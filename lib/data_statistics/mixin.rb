@@ -12,6 +12,7 @@ module DataStatistics
       options = @@counter_config[self.class.name]&.[](counter_type)
       raise "unknow counter_type" unless options
 
+      time = time.to_time if time.is_a?(Date)
       options.each do |time_name, flag|
         next unless flag
 
@@ -21,7 +22,11 @@ module DataStatistics
                              [time.send("beginning_of_#{time_name}"), time.send("end_of_#{time_name}")]
                            end
 
-        counter = Counter.find_or_create_by(owner: self, counter_type: counter_type, time_kind: time_name, start_at: start_at, end_at: end_at)
+        counter =  begin
+            Counter.find_or_create_by(owner: self, counter_type: counter_type, time_kind: time_name, start_at: start_at, end_at: end_at)
+          rescue ::ActiveRecord::RecordNotUnique
+            Counter.find_by(owner: self, counter_type: counter_type, time_kind: time_name, start_at: start_at, end_at: end_at)
+          end
         counter.increment!(:value, by)
       end
 
