@@ -8,7 +8,7 @@ module DataStatistics
     mattr_accessor :counter_hash
     @@counter_config = {}
 
-    def counter_increment!(counter_type, by, time)
+    def counter_increment!(counter_type, by = 1, time = Time.current)
       options = @@counter_config[self.class.name]&.[](counter_type)
       raise "unknow counter_type" unless options
 
